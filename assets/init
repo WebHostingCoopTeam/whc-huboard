@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e
 
-INSTALL_DIR="/apprun"
-CONFIG_DIR="${INSTALL_DIR}/config"
+INSTALL_DIR="/app"
+CONFIG_DIR="/apprun/config"
 DATA_DIR="/apprun/data"
 SSL_CERTIFICATES_DIR="${DATA_DIR}/certs"
 
 SETUP_DIR="/apprun/setup"
-SYSCONF_TEMPLATES_DIR="${INSTALL_DIR}/config"
+SYSCONF_TEMPLATES_DIR="/apprun/config"
 USERCONF_TEMPLATES_DIR="${DATA_DIR}/config"
 
 DB_HOST=${DB_HOST:-}
@@ -301,20 +301,20 @@ else
 fi
 
 # configure unicorn
-#sudo -u huboard -H sed 's,{{INSTALL_DIR}},'"${INSTALL_DIR}"',g' -i config/unicorn.rb
-#sudo -u huboard -H sed 's/{{UNICORN_WORKERS}}/'"${UNICORN_WORKERS}"'/' -i config/unicorn.rb
-#sudo -u huboard -H sed 's/{{UNICORN_TIMEOUT}}/'"${UNICORN_TIMEOUT}"'/' -i config/unicorn.rb
+sudo -u huboard -H sed 's,{{INSTALL_DIR}},'"${INSTALL_DIR}"',g' -i config/unicorn.rb
+sudo -u huboard -H sed 's/{{UNICORN_WORKERS}}/'"${UNICORN_WORKERS}"'/' -i config/unicorn.rb
+sudo -u huboard -H sed 's/{{UNICORN_TIMEOUT}}/'"${UNICORN_TIMEOUT}"'/' -i config/unicorn.rb
 
 # configure relative_url_root
-#if [ -n "${HUBOARD_RELATIVE_URL_ROOT}" ]; then
-  #sudo -u huboard -H cp -f ${SYSCONF_TEMPLATES_DIR}/huboard/config.ru config.ru
-  #sudo -u huboard -H sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},'"${HUBOARD_RELATIVE_URL_ROOT}"',' -i config/unicorn.rb
-  #sed 's,# alias '"${INSTALL_DIR}"'/public,alias '"${INSTALL_DIR}"'/public,' -i /etc/nginx/sites-enabled/huboard
-  #sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},'"${HUBOARD_RELATIVE_URL_ROOT}"',' -i /etc/nginx/sites-enabled/huboard
-#else
-  #sudo -u huboard -H sed '/{{HUBOARD_RELATIVE_URL_ROOT}}/d' -i config/unicorn.rb
-  #sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},/,' -i /etc/nginx/sites-enabled/huboard
-#fi
+if [ -n "${HUBOARD_RELATIVE_URL_ROOT}" ]; then
+  sudo -u huboard -H cp -f ${SYSCONF_TEMPLATES_DIR}/huboard/config.ru config.ru
+  sudo -u huboard -H sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},'"${HUBOARD_RELATIVE_URL_ROOT}"',' -i config/unicorn.rb
+  sed 's,# alias '"${INSTALL_DIR}"'/public,alias '"${INSTALL_DIR}"'/public,' -i /etc/nginx/sites-enabled/huboard
+  sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},'"${HUBOARD_RELATIVE_URL_ROOT}"',' -i /etc/nginx/sites-enabled/huboard
+else
+  sudo -u huboard -H sed '/{{HUBOARD_RELATIVE_URL_ROOT}}/d' -i config/unicorn.rb
+  sed 's,{{HUBOARD_RELATIVE_URL_ROOT}},/,' -i /etc/nginx/sites-enabled/huboard
+fi
 
 if [ "${SMTP_ENABLED}" == "true" ]; then
   # configure mail delivery
@@ -406,19 +406,19 @@ if [ "${HUBOARD_VERSION}" != "${CURRENT_VERSION}" ]; then
   sudo -u huboard -H mkdir -p ${DATA_DIR}/tmp/plugin_assets
 
   # copy the installed gems to tmp/bundle and move the Gemfile.lock
-  sudo -u huboard -H cp -a vendor/bundle ${DATA_DIR}/tmp/
-  sudo -u huboard -H cp -a Gemfile.lock ${DATA_DIR}/tmp/
+  #sudo -u huboard -H cp -a vendor/bundle ${DATA_DIR}/tmp/
+  #sudo -u huboard -H cp -a Gemfile.lock ${DATA_DIR}/tmp/
 
-  echo "Migrating database. Please be patient, this could take a while..."
-  sudo -u huboard -H bundle exec rake db:create RAILS_ENV=production
-  sudo -u huboard -H bundle exec rake db:migrate RAILS_ENV=production
+  #echo "Migrating database. Please be patient, this could take a while..."
+  #sudo -u huboard -H bundle exec rake db:create RAILS_ENV=production
+  #sudo -u huboard -H bundle exec rake db:migrate RAILS_ENV=production
 
-  # clear sessions and application cache
-  sudo -u huboard -H bundle exec rake tmp:cache:clear RAILS_ENV=production >/dev/null
-  sudo -u huboard -H bundle exec rake tmp:sessions:clear RAILS_ENV=production >/dev/null
+  ## clear sessions and application cache
+  #sudo -u huboard -H bundle exec rake tmp:cache:clear RAILS_ENV=production >/dev/null
+  #sudo -u huboard -H bundle exec rake tmp:sessions:clear RAILS_ENV=production >/dev/null
 
-  echo "Generating secure token..."
-  sudo -u huboard -H bundle exec rake generate_secret_token RAILS_ENV=production >/dev/null
+  #echo "Generating secure token..."
+  #sudo -u huboard -H bundle exec rake generate_secret_token RAILS_ENV=production >/dev/null
 
   # update version file
   echo "${HUBOARD_VERSION}" | sudo -u huboard -H tee --append ${DATA_DIR}/tmp/VERSION >/dev/null
@@ -435,9 +435,9 @@ case "${HUBOARD_FETCH_COMMITS}" in
 esac
 
 # remove vendor/bundle and symlink to ${DATA_DIR}/tmp/bundle
-rm -rf vendor/bundle Gemfile.lock
-ln -sf ${DATA_DIR}/tmp/bundle vendor/bundle
-ln -sf ${DATA_DIR}/tmp/Gemfile.lock Gemfile.lock
+#rm -rf vendor/bundle Gemfile.lock
+#ln -sf ${DATA_DIR}/tmp/bundle vendor/bundle
+#ln -sf ${DATA_DIR}/tmp/Gemfile.lock Gemfile.lock
 
 # install user plugins
 if [ -d ${DATA_DIR}/plugins ]; then
@@ -454,7 +454,7 @@ if [ -d ${DATA_DIR}/plugins ]; then
     rm -rf ${DATA_DIR}/tmp/plugin_assets/*
 
     echo "Installing gems required by plugins..."
-    bundle install --without development tests --path vendor/bundle
+    #bundle install --without development tests --path vendor/bundle
 
     echo "Migrating plugins. Please be patient, this could take a while..."
     sudo -u huboard -H bundle exec rake huboard:plugins:migrate RAILS_ENV=production
@@ -484,6 +484,7 @@ appStart () {
   rm -rf tmp/sockets/huboard.socket
 
   # start supervisord
+  echo 'we are here'
   exec /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 }
 
