@@ -226,12 +226,12 @@ case "${HUBOARD_HTTPS}" in
     ;;
   *) cp ${SYSCONF_TEMPLATES_DIR}/nginx/huboard /etc/nginx/sites-enabled/huboard ;;
 esac
-#sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/database.yml config/database.yml
-#sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/unicorn.rb config/unicorn.rb
-#[ "${SMTP_ENABLED}" == "true" ] && \
-#sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/smtp_settings.rb config/initializers/smtp_settings.rb
-#[ "${MEMCACHE_ENABLED}" == "true" ] && \
-#sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/additional_environment.rb config/additional_environment.rb
+sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/database.yml config/database.yml
+sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/unicorn.rb config/unicorn.rb
+[ "${SMTP_ENABLED}" == "true" ] && \
+sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/smtp_settings.rb config/initializers/smtp_settings.rb
+[ "${MEMCACHE_ENABLED}" == "true" ] && \
+sudo -u huboard -H cp ${SYSCONF_TEMPLATES_DIR}/huboard/additional_environment.rb config/additional_environment.rb
 
 # override default configuration templates with user templates
 case "${HUBOARD_HTTPS}" in

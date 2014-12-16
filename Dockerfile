@@ -6,6 +6,7 @@ RUN /app/setup/install
 
 ADD assets/VERSION /apprun/
 ADD assets/config/ /apprun/config/
+#ADD assets/config/huboard/unicorn.rb /apprun/config/
 ADD assets/init /apprun/init
 RUN chmod 755 /apprun/init
 #RUN useradd huboard
