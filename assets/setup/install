@@ -33,7 +33,7 @@ echo "${HUBOARD_VERSION}" > ${INSTALL_DIR}/VERSION
 
 # add gems for app server and memcache support
 #echo 'gem "unicorn"' >> Gemfile
-echo 'gem "dalli", "~> 2.7.0"' >> Gemfile
+#echo 'gem "dalli", "~> 2.7.0"' >> Gemfile
 
 # install gems, use cache if available
 if [ -d "${GEM_CACHE_DIR}" ]; then

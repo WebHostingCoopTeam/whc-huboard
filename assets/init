@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
-
+ls -lh /apprun
+sleep 3
+APPRUN_DIR="/app"
 INSTALL_DIR="/app"
 CONFIG_DIR="/apprun/config"
 DATA_DIR="/apprun/data"
@@ -211,7 +213,7 @@ chown huboard:huboard ${DATA_DIR}
 # container using --volumes-from)
 chmod +x ${DATA_DIR}
 
-cd ${INSTALL_DIR}
+cd ${APPRUN_DIR}
 
 # copy configuration templates
 case "${HUBOARD_HTTPS}" in
@@ -301,9 +303,9 @@ else
 fi
 
 # configure unicorn
-sudo -u huboard -H sed 's,{{INSTALL_DIR}},'"${INSTALL_DIR}"',g' -i config/unicorn.rb
-sudo -u huboard -H sed 's/{{UNICORN_WORKERS}}/'"${UNICORN_WORKERS}"'/' -i config/unicorn.rb
-sudo -u huboard -H sed 's/{{UNICORN_TIMEOUT}}/'"${UNICORN_TIMEOUT}"'/' -i config/unicorn.rb
+sudo -u huboard -H sed 's,{{INSTALL_DIR}},'"${INSTALL_DIR}"',g' -i /apprun/config/unicorn.rb
+sudo -u huboard -H sed 's/{{UNICORN_WORKERS}}/'"${UNICORN_WORKERS}"'/' -i /apprun/config/unicorn.rb
+sudo -u huboard -H sed 's/{{UNICORN_TIMEOUT}}/'"${UNICORN_TIMEOUT}"'/' -i /apprun/config/unicorn.rb
 
 # configure relative_url_root
 if [ -n "${HUBOARD_RELATIVE_URL_ROOT}" ]; then
@@ -440,41 +442,41 @@ esac
 #ln -sf ${DATA_DIR}/tmp/Gemfile.lock Gemfile.lock
 
 # install user plugins
-if [ -d ${DATA_DIR}/plugins ]; then
-  echo "Installing plugins..."
-  rsync -avq --chown=huboard:huboard ${DATA_DIR}/plugins/ ${INSTALL_DIR}/plugins/
+#if [ -d ${DATA_DIR}/plugins ]; then
+  #echo "Installing plugins..."
+  #rsync -avq --chown=huboard:huboard ${DATA_DIR}/plugins/ ${INSTALL_DIR}/plugins/
 
-  # install gems and migrate the plugins when plugins are added/removed
-  CURRENT_SHA1=
-  [ -f ${DATA_DIR}/tmp/plugins.sha1 ] && CURRENT_SHA1=$(cat ${DATA_DIR}/tmp/plugins.sha1)
-  PLUGINS_SHA1=$(find ${DATA_DIR}/plugins -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | awk '{print $1}')
-  if [ "${CURRENT_SHA1}" != "${PLUGINS_SHA1}" ]; then
-    # remove the existing plugin assets
-    # this ensures there is no cruft when a plugin is removed.
-    rm -rf ${DATA_DIR}/tmp/plugin_assets/*
+  ## install gems and migrate the plugins when plugins are added/removed
+  #CURRENT_SHA1=
+  #[ -f ${DATA_DIR}/tmp/plugins.sha1 ] && CURRENT_SHA1=$(cat ${DATA_DIR}/tmp/plugins.sha1)
+  #PLUGINS_SHA1=$(find ${DATA_DIR}/plugins -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | awk '{print $1}')
+  #if [ "${CURRENT_SHA1}" != "${PLUGINS_SHA1}" ]; then
+    ## remove the existing plugin assets
+    ## this ensures there is no cruft when a plugin is removed.
+    #rm -rf ${DATA_DIR}/tmp/plugin_assets/*
 
-    echo "Installing gems required by plugins..."
-    #bundle install --without development tests --path vendor/bundle
+    #echo "Installing gems required by plugins..."
+    ##bundle install --without development tests --path vendor/bundle
 
-    echo "Migrating plugins. Please be patient, this could take a while..."
-    sudo -u huboard -H bundle exec rake huboard:plugins:migrate RAILS_ENV=production
+    #echo "Migrating plugins. Please be patient, this could take a while..."
+    #sudo -u huboard -H bundle exec rake huboard:plugins:migrate RAILS_ENV=production
 
-    # save SHA1
-    echo -n "${PLUGINS_SHA1}" > ${DATA_DIR}/tmp/plugins.sha1
-  fi
+    ## save SHA1
+    #echo -n "${PLUGINS_SHA1}" > ${DATA_DIR}/tmp/plugins.sha1
+  #fi
 
-  # source plugins init script
-  if [ -f ${DATA_DIR}/plugins/init ]; then
-    echo "Executing plugins startup script..."
-    . ${DATA_DIR}/plugins/init
-  fi
-fi
+  ## source plugins init script
+  #if [ -f ${DATA_DIR}/plugins/init ]; then
+    #echo "Executing plugins startup script..."
+    #. ${DATA_DIR}/plugins/init
+  #fi
+#fi
 
 # install user themes
-if [ -d ${DATA_DIR}/themes ]; then
-  echo "Installing themes..."
-  rsync -avq --chown=huboard:huboard ${DATA_DIR}/themes/ ${INSTALL_DIR}/public/themes/
-fi
+#if [ -d ${DATA_DIR}/themes ]; then
+  #echo "Installing themes..."
+  #rsync -avq --chown=huboard:huboard ${DATA_DIR}/themes/ ${INSTALL_DIR}/public/themes/
+#fi
 
 appStart () {
   # remove stale unicorn pid if it exists.

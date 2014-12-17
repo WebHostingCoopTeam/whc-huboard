@@ -8,7 +8,7 @@ task :rm => [:kill, :rm_docker]
 
 desc "Run Docker image"
 task :run_docker do
-  sh 'docker run --name huboard -P --cidfile="cid" -t whc/huboard'
+  sh 'docker run --name huboard1 -P --cidfile="cid" -t whcteam/huboard1'
 end
 
 desc "Exec bash in Docker image"
@@ -29,5 +29,5 @@ end
 
 desc "Build Docker image"
 task :build_docker do
-  sh 'docker build -t whc/huboard .'
+  sh 'docker build -t whcteam/huboard1 .'
 end
